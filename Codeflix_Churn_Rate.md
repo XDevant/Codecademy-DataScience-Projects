@@ -24,7 +24,7 @@ We show only the 2 firsts and 3 lasts of the 100:
 |100|2016-12-06|2017-03-11|30|
 
 We can check channels this way :
-```sqlite
+```sql
 SELECT DISTINCT segment FROM subscriptions;
 ```
 This will return :
@@ -36,7 +36,7 @@ This will return :
 
 2.Determine the range of months of data provided. Which months will you be able to calculate churn for?
 
-```sqlite
+```sql
 SELECT MIN(subscription_start) AS 'First Subscription',
        MAX(subscription_start) AS 'Last Subscription'
 FROM subscriptions;
@@ -53,7 +53,7 @@ This will return :
 
 To get started, create a temporary table of months.
 
-```sqlite
+```sql
 WITH months AS(
   SELECT 
     '2017-01-01' AS first_day, 
@@ -70,7 +70,7 @@ WITH months AS(
 
 4.Create a temporary table, cross_join, from subscriptions and your months. Be sure to SELECT every column.
 
-```sqlite
+```sql
 WITH months AS(
   SELECT 
     '2017-01-01' AS first_day, 
@@ -96,7 +96,7 @@ WITH months AS(
     is_active_30 created using a CASE WHEN to find any users from segment 30 who existed prior to the beginning of the month. This is 1 if true and 0 otherwise.
 
 To do this we add the following code to our With statement:
-```sqlite
+```sql
         , status AS (
     SELECT id , first_day AS month, 
         CASE
@@ -115,7 +115,7 @@ To do this we add the following code to our With statement:
 6.Add an `is_canceled_87` and an `is_canceled_30` column to the status temporary table. This should be `1` if the subscription is canceled during the month and `0` otherwise.
 
 Our complete status table is now :
-```sqlite
+```sql
         , status AS (
 SELECT id , first_day AS month, 
     CASE
@@ -150,7 +150,7 @@ The resulting columns should be:
     sum_canceled_87
     sum_canceled_30
 
-```sqlite
+```sql
         ,status_aggregate AS (
     SELECT status.month AS mon,
            SUM(status.is_active_87) AS sum_active_87,
@@ -164,7 +164,7 @@ The resulting columns should be:
 8.Calculate the churn rates for the two segments over the three month period. Which segment has a lower churn rate?
 
 The final request is now :
-```sqlite
+```sql
 WITH months AS(
   SELECT 
     '2017-01-01' AS first_day, 
@@ -232,7 +232,7 @@ FROM status_aggregate;
 
 Each channel has only few lines of code we can easily copy or generate:\
 In `status` we have the 2 `CASE` that build `is_active_cn` and `is_canceled_cn`
-```sqlite
+```sql
 ,
 CASE
      WHEN (segment=cn) AND (subscription_start < first_day) AND ((subscription_end >= first_day) OR (subscription_end IS NULL))
@@ -264,7 +264,7 @@ In the final call one line of code per channel :
  For this, we need to SELECT the `segment` column in `status` and `status_aggregate`, and rewrite the 2 CASE we keep to check for `is_canceled` and `is_active` (without separating each channel).
  
  
- ```sqlite
+ ```sql
  WITH months AS(
   SELECT 
     '2017-01-01' AS first_day, 
