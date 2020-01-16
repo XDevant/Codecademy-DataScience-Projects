@@ -8,7 +8,7 @@
 
 1.Take a look at the first 100 rows of data in the subscriptions table. How many different segments do you see?
 
-```sql
+```SQL
 SELECT * FROM subscriptions
 LIMIT 100;
 ```
